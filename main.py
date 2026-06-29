@@ -7,6 +7,8 @@ sys.stdout.reconfigure(encoding="utf-8")
 
 from core.boot import Chronos
 from agents.hermes_v2 import HermesAgent
+import openai
+from tools.openai_client import OpenAIClient
 
 
 def main():
@@ -24,11 +26,16 @@ def main():
         context="gamdo",
     )
 
-    print("─" * 50)
-    print(f"  context : {payload['context']}")
-    print(f"  user    : {payload['user']}")
-    print(f"  system  : {len(payload['system'])} chars")
-    print("─" * 50)
+    try:
+        client = OpenAIClient(chronos.config)
+        response = client.complete(payload)
+        print("─" * 50)
+        print(response)
+        print("─" * 50)
+    except RuntimeError as e:
+        print(f"\n{e}\n")
+    except openai.OpenAIError as e:
+        print(f"\n[OpenAIClient] API error: {e}\n")
 
 
 if __name__ == "__main__":
