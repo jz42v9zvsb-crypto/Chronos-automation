@@ -28,9 +28,15 @@ def main():
 
     try:
         client = OpenAIClient(chronos.config)
-        response = client.complete(payload)
+        result = client.complete(payload)
         print("─" * 50)
-        print(response)
+        print(result["answer"])
+        print("─" * 50)
+        print(f"  provider : {result['provider']}")
+        print(f"  model    : {result['model']}")
+        print(f"  latency  : {result['latency_sec']}s")
+        if result["usage"]:
+            print(f"  tokens   : {result['usage']['total_tokens']}")
         print("─" * 50)
     except RuntimeError as e:
         print(f"\n{e}\n")

@@ -3,6 +3,7 @@ Chronos OS — OpenAI Client
 """
 
 import os
+import time
 import openai
 
 
@@ -17,7 +18,8 @@ class OpenAIClient:
             )
         self._client = openai.OpenAI(api_key=api_key)
 
-    def complete(self, payload: dict) -> str:
+    def complete(self, payload: dict) -> dict:
+        t0 = time.perf_counter()
         response = self._client.chat.completions.create(
             model=self.model,
             messages=[
@@ -25,4 +27,20 @@ class OpenAIClient:
                 {"role": "user",   "content": payload["user"]},
             ],
         )
-        return response.choices[0].message.content
+        latency = time.perf_counter() - t0
+
+        usage = None
+        if response.usage:
+            usage = {
+                "prompt_tokens":     response.usage.prompt_tokens,
+                "completion_tokens": response.usage.completion_tokens,
+                "total_tokens":      response.usage.total_tokens,
+            }
+
+        return {
+            "answer":      response.choices[0].message.content,
+            "provider":    "openai",
+            "model":       response.model,
+            "usage":       usage,
+            "latency_sec": round(latency, 3),
+        }
