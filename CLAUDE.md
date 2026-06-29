@@ -24,6 +24,36 @@ If architecture should change, STOP and ask.
 
 ---
 
+# Commit Rules
+
+Use only these commit prefixes:
+
+- feat:
+- fix:
+- refactor:
+- docs:
+- test:
+- chore:
+
+Examples:
+
+- feat(core): add router
+- feat(hermes): build prompt pipeline
+- fix(core): boot path resolution
+- refactor(hermes): simplify prompt loader
+- docs: add ADR-001
+- test: add Hermes loader tests
+- chore: update gitignore
+
+Before every commit:
+1. run validation if code changed
+2. show git diff
+3. ask for approval
+
+Do not create commits with vague messages like "update", "fix stuff", or "changes".
+
+---
+
 # Development Rules
 
 ## 1. Never overwrite existing files
