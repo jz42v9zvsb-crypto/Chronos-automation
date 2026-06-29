@@ -9,6 +9,7 @@ from core.boot import Chronos
 from agents.hermes_v2 import HermesAgent
 import openai
 from tools.openai_client import OpenAIClient
+from tools.knowledge_writer import KnowledgeWriter
 
 
 def main():
@@ -26,6 +27,8 @@ def main():
         context="gamdo",
     )
 
+    writer = KnowledgeWriter(chronos.root)
+
     try:
         client = OpenAIClient(chronos.config)
         result = client.complete(payload)
@@ -38,6 +41,13 @@ def main():
         if result["usage"]:
             print(f"  tokens   : {result['usage']['total_tokens']}")
         print("─" * 50)
+
+        saved = writer.save(
+            category="luxury",
+            topic="burberry_daniel_lee",
+            content=result["answer"],
+        )
+        print(f"\nKnowledge saved:\n  {saved.relative_to(chronos.root)}\n")
     except RuntimeError as e:
         print(f"\n{e}\n")
     except openai.OpenAIError as e:
