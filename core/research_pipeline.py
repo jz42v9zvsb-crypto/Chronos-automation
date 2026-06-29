@@ -5,7 +5,17 @@ Owns the full research flow:
 Search → Evidence → Prompt → LLM → Knowledge
 """
 
+import re
+from datetime import datetime
+
 from core.evidence import evidence_list_to_markdown
+
+
+def _topic_slug(task: str) -> str:
+    date = datetime.now().strftime("%Y%m%d")
+    slug = re.sub(r"[^\w]", "_", task[:40].strip().lower())
+    slug = re.sub(r"_+", "_", slug).strip("_")
+    return f"{date}_{slug}"
 
 
 class ResearchPipeline:
@@ -15,7 +25,7 @@ class ResearchPipeline:
         self.llm_client       = llm_client
         self.knowledge_writer = knowledge_writer
 
-    def run(self, task: str, context: str, category: str, topic: str) -> dict:
+    def run(self, task: str, ctx) -> dict:
         # 1. Search → Evidence
         search_data    = self.search_provider.search(task)
         evidence       = self.search_provider.to_evidence(search_data)
@@ -24,7 +34,7 @@ class ResearchPipeline:
         # 2. Prompt
         prompt = self.chronos.ask(
             task=task,
-            context=context,
+            ctx=ctx,
             search_summary=search_summary,
         )
 
@@ -33,14 +43,14 @@ class ResearchPipeline:
 
         # 4. Save
         saved_path = self.knowledge_writer.save(
-            category=category,
-            topic=topic,
+            category=ctx.project,
+            topic=_topic_slug(task),
             content=result["answer"],
         )
 
         return {
             "task":        task,
-            "context":     context,
+            "context":     ctx.project,
             "search":      search_data,
             "answer":      result["answer"],
             "provider":    result["provider"],

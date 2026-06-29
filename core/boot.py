@@ -12,6 +12,7 @@ from pathlib import Path
 from datetime import datetime
 
 from core.prompt import Prompt
+from core.context import ResearchContext
 
 
 VERSION = "0.1.0"
@@ -92,18 +93,28 @@ class Chronos:
             return agent.handle(task, context)
         return "[Chronos] 라우팅 준비 중 — Hermes 에이전트 연결 필요"
 
-    def ask(self, task: str, context: str = "gamdo", search_summary: str = "") -> Prompt:
+    def ask(self, task: str, ctx: ResearchContext, search_summary: str = "") -> Prompt:
         """
         태스크를 Hermes system prompt로 변환 → Prompt 반환
-
-        context: gamdo | amway | axis | investment
         """
         hermes = self.agents.get("hermes")
         if not hermes:
             raise RuntimeError("[Chronos] Hermes agent not registered")
 
-        system_prompt = hermes.build_system_prompt(context, search_summary=search_summary)
-        return Prompt(system=system_prompt, user=task, context=context)
+        system_base = hermes.build_system_prompt(ctx.project, search_summary=search_summary)
+        context_block = (
+            f"## 리서치 컨텍스트\n"
+            f"- 프로젝트: {ctx.project}\n"
+            f"- 페르소나: {ctx.persona}\n"
+            f"- 아웃풋: {ctx.output}\n"
+            f"- 조사 깊이: {ctx.depth}\n"
+            f"- 언어: {ctx.language}\n"
+        )
+        return Prompt(
+            system=system_base + "\n\n---\n\n" + context_block,
+            user=task,
+            context=ctx.project,
+        )
 
     def register(self, name: str, agent):
         """에이전트 등록"""
