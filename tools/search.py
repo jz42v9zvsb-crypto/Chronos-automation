@@ -9,6 +9,8 @@ import os
 from abc import ABC, abstractmethod
 from datetime import datetime
 
+from core.evidence import Evidence
+
 
 class SearchProvider(ABC):
     @abstractmethod
@@ -60,3 +62,17 @@ class TavilySearchProvider(SearchProvider):
             "provider":    self.PROVIDER_NAME,
             "searched_at": datetime.utcnow().isoformat(),
         }
+
+    def to_evidence(self, search_data: dict) -> list:
+        searched_at = search_data.get("searched_at", "")
+        return [
+            Evidence(
+                provider=self.PROVIDER_NAME,
+                title=r["title"],
+                url=r["url"],
+                snippet=r["content"][:200].strip(),
+                score=r.get("score"),
+                searched_at=searched_at,
+            )
+            for r in search_data.get("results", [])
+        ]
