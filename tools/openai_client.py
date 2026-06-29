@@ -6,6 +6,8 @@ import os
 import time
 import openai
 
+from core.prompt import Prompt
+
 
 class OpenAIClient:
     def __init__(self, config: dict, model: str = "gpt-4o-mini"):
@@ -18,14 +20,11 @@ class OpenAIClient:
             )
         self._client = openai.OpenAI(api_key=api_key)
 
-    def complete(self, payload: dict) -> dict:
+    def complete(self, prompt: Prompt) -> dict:
         t0 = time.perf_counter()
         response = self._client.chat.completions.create(
             model=self.model,
-            messages=[
-                {"role": "system", "content": payload["system"]},
-                {"role": "user",   "content": payload["user"]},
-            ],
+            messages=prompt.to_openai_messages(),
         )
         latency = time.perf_counter() - t0
 

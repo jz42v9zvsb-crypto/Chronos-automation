@@ -22,14 +22,14 @@ class ResearchPipeline:
         search_summary = evidence_list_to_markdown(evidence)
 
         # 2. Prompt
-        payload = self.chronos.ask(
+        prompt = self.chronos.ask(
             task=task,
             context=context,
             search_summary=search_summary,
         )
 
         # 3. LLM
-        result = self.llm_client.complete(payload)
+        result = self.llm_client.complete(prompt)
 
         # 4. Save
         saved_path = self.knowledge_writer.save(

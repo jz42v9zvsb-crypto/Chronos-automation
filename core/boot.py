@@ -11,6 +11,8 @@ import os
 from pathlib import Path
 from datetime import datetime
 
+from core.prompt import Prompt
+
 
 VERSION = "0.1.0"
 ROOT = Path(__file__).parent.parent
@@ -90,23 +92,18 @@ class Chronos:
             return agent.handle(task, context)
         return "[Chronos] 라우팅 준비 중 — Hermes 에이전트 연결 필요"
 
-    def ask(self, task: str, context: str = "gamdo", search_summary: str = "") -> dict:
+    def ask(self, task: str, context: str = "gamdo", search_summary: str = "") -> Prompt:
         """
-        태스크를 Hermes system prompt로 변환 → API-ready payload 반환
+        태스크를 Hermes system prompt로 변환 → Prompt 반환
 
         context: gamdo | amway | axis | investment
-        Returns: {"system": str, "user": str, "context": str}
         """
         hermes = self.agents.get("hermes")
         if not hermes:
             raise RuntimeError("[Chronos] Hermes agent not registered")
 
         system_prompt = hermes.build_system_prompt(context, search_summary=search_summary)
-        return {
-            "system": system_prompt,
-            "user": task,
-            "context": context,
-        }
+        return Prompt(system=system_prompt, user=task, context=context)
 
     def register(self, name: str, agent):
         """에이전트 등록"""
