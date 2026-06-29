@@ -41,7 +41,10 @@ class TavilySearchProvider(SearchProvider):
         self._client = TavilyClient(api_key=api_key)
 
     def search(self, query: str, max_results: int = 5) -> dict:
-        raw = self._client.search(query=query, max_results=max_results)
+        try:
+            raw = self._client.search(query=query, max_results=max_results)
+        except Exception as e:
+            raise RuntimeError(f"[TavilySearchProvider] search failed: {e}") from e
         results = [
             {
                 "url":     r.get("url", ""),

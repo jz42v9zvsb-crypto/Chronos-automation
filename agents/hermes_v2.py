@@ -62,18 +62,22 @@ class HermesAgent:
         ]
         return "\n" + "\n".join(lines) + "\n"
 
-    def build_system_prompt(self, context: str = "gamdo") -> str:
+    def build_system_prompt(self, context: str = "gamdo", search_summary: str = "") -> str:
         context_instructions = {
             "gamdo":      "현재 작업은 감도 유튜브 채널용 luxury brand research입니다.",
             "amway":      "현재 작업은 Amway Korea STP 자료조사입니다.",
             "axis":       "현재 작업은 AXIS 성형외과 관련 리서치입니다.",
             "investment": "현재 작업은 주식/투자 관련 리서치입니다.",
         }
-        parts = "\n\n---\n\n".join(
-            "# " + k.upper() + "\n" + v for k, v in self.prompt_parts.items()
-        )
+
+        sections = []
+        for k, v in self.prompt_parts.items():
+            sections.append("# " + k.upper() + "\n" + v)
+            if k == "principles" and search_summary:
+                sections.append("# SEARCH RESULTS\n" + search_summary)
+
         instruction = context_instructions.get(context, "")
-        return parts + "\n\n---\n\n" + instruction
+        return "\n\n---\n\n".join(sections) + "\n\n---\n\n" + instruction
 
 
 Hermes = HermesAgent

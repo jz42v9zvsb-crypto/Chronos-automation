@@ -90,7 +90,7 @@ class Chronos:
             return agent.handle(task, context)
         return "[Chronos] 라우팅 준비 중 — Hermes 에이전트 연결 필요"
 
-    def ask(self, task: str, context: str = "gamdo") -> dict:
+    def ask(self, task: str, context: str = "gamdo", search_summary: str = "") -> dict:
         """
         태스크를 Hermes system prompt로 변환 → API-ready payload 반환
 
@@ -101,7 +101,7 @@ class Chronos:
         if not hermes:
             raise RuntimeError("[Chronos] Hermes agent not registered")
 
-        system_prompt = hermes.build_system_prompt(context)
+        system_prompt = hermes.build_system_prompt(context, search_summary=search_summary)
         return {
             "system": system_prompt,
             "user": task,
