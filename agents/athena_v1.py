@@ -40,19 +40,26 @@ class AthenaAgent:
         print(f"  [athena] loaded: {loaded} ({total_chars} chars)")
         return self
 
-    def build_system_prompt(self, context: str = "", source_summary: str = "") -> str:
+    def build_system_prompt(self, context: str = "", source_summary: str = "", project_context: str = "") -> str:
         """
         Assemble Athena's strategy system prompt.
 
-        source_summary is the existing knowledge (Hermes research) Athena must
-        ground its interpretation in. It is injected right after the principles
-        so the grounding rules apply to it directly.
+        Three blocks are kept explicitly distinct so Athena never confuses them:
+          - PROJECT CONTEXT   — objective/audience/constraints (the lens)
+          - EXISTING KNOWLEDGE — Hermes research (the grounding facts)
+          - STRATEGIC INTERPRETATION — Athena's task (passed via `context`)
+
+        Project context is injected before knowledge so interpretation is read
+        through the project's goals. Both go right after the principles.
         """
         sections = []
         for k, v in self.prompt_parts.items():
             sections.append("# " + k.upper() + "\n" + v)
-            if k == "principles" and source_summary:
-                sections.append("# SOURCE KNOWLEDGE (Hermes 리서치 결과)\n" + source_summary)
+            if k == "principles":
+                if project_context:
+                    sections.append("# PROJECT CONTEXT (프로젝트 컨텍스트)\n" + project_context)
+                if source_summary:
+                    sections.append("# EXISTING KNOWLEDGE (Hermes 리서치 결과)\n" + source_summary)
 
         result = "\n\n---\n\n".join(sections)
 

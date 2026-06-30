@@ -37,22 +37,34 @@ class StrategyPipeline:
         self.llm_client       = llm_client
         self.knowledge_reader = knowledge_reader
 
-    def run(self, project: str, task: str, athena, knowledge_writer) -> dict:
+    def run(self, project: str, task: str, athena, knowledge_writer, project_ctx=None) -> dict:
         # 1. Read existing project knowledge (Hermes research)
         items          = self.knowledge_reader.read_project_knowledge(project)
         source_summary = self.knowledge_reader.to_markdown(items)
         print(f"  [strategy] {len(items)} knowledge file(s) loaded")
 
-        # 2. Build Athena prompt grounded in that knowledge (no new research).
-        #    Require the exact 7 StrategyOutput sections so results are consistent
-        #    and directly usable for STP slide planning.
+        # 1b. Project context (contexts/<project>/) — the lens for interpretation
+        project_context_md    = project_ctx.to_markdown() if project_ctx is not None else ""
+        project_context_empty = project_ctx is None or project_ctx.is_empty()
+        project_context_used  = bool(project_context_md)
+        print(f"  [strategy] project context: used={project_context_used} empty={project_context_empty}")
+
+        # 2. Build Athena prompt: PROJECT CONTEXT → EXISTING KNOWLEDGE → STRATEGIC
+        #    INTERPRETATION. Require the exact 7 StrategyOutput sections so results
+        #    are consistent and directly usable for STP slide planning.
         section_list = "\n".join(f"{i}. {t}" for i, t in enumerate(SECTION_TITLES, 1))
         context = (
+            "# STRATEGIC INTERPRETATION (당신의 과제)\n"
             f"현재 작업은 '{project}' 프로젝트의 전략 해석입니다.\n"
-            f"반드시 아래 7개 섹션 제목을 영문 그대로, 마크다운 헤딩으로 사용해 출력하세요:\n"
+            "위 PROJECT CONTEXT(목표·오디언스·제약)를 렌즈로 삼아 EXISTING KNOWLEDGE를 해석하세요.\n"
+            "반드시 아래 7개 섹션 제목을 영문 그대로, 마크다운 헤딩으로 사용해 출력하세요:\n"
             f"{section_list}"
         )
-        system = athena.build_system_prompt(context=context, source_summary=source_summary)
+        system = athena.build_system_prompt(
+            context=context,
+            source_summary=source_summary,
+            project_context=project_context_md,
+        )
         prompt = Prompt(system=system, user=task, context=project)
 
         # 3. LLM
@@ -79,4 +91,6 @@ class StrategyPipeline:
             "knowledge_used_count":     len(items),
             "required_sections_present": required_present,
             "missing_sections":         missing,
+            "project_context_used":     project_context_used,
+            "project_context_empty":    project_context_empty,
         }

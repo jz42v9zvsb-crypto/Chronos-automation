@@ -160,12 +160,15 @@ class Chronos:
         """
         from agents.athena_v1 import AthenaAgent
         from core.strategy_pipeline import StrategyPipeline
+        from core.project_loader import ProjectLoader
         from tools.openai_client import OpenAIClient
         from tools.knowledge_writer import KnowledgeWriter
         from tools.knowledge_reader import KnowledgeReader
 
         athena = AthenaAgent(self.root)
         athena.load()
+
+        project_ctx = ProjectLoader(self.root).load(project)
 
         pipeline = StrategyPipeline(
             chronos=self,
@@ -178,6 +181,7 @@ class Chronos:
             task=task,
             athena=athena,
             knowledge_writer=KnowledgeWriter(self.root),
+            project_ctx=project_ctx,
         )
 
     def register(self, name: str, agent):
