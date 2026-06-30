@@ -13,6 +13,7 @@ from datetime import datetime
 from core.prompt import Prompt
 from core.strategy_output import SECTION_TITLES
 from core.strategy_handoff import HANDOFF_SECTION_TITLE, HANDOFF_SUBSECTIONS
+from core.strategy_quality import StrategyQualityChecker
 
 
 def _topic_slug(task: str) -> str:
@@ -20,16 +21,6 @@ def _topic_slug(task: str) -> str:
     slug = re.sub(r"[^\w]", "_", task[:40].strip().lower())
     slug = re.sub(r"_+", "_", slug).strip("_")
     return f"{date}_{slug}"
-
-
-def _normalize(text: str) -> str:
-    return re.sub(r"[^a-z0-9]", "", text.lower())
-
-
-def _missing_sections(answer: str) -> list:
-    """Return required section titles not found in the answer (heading check only)."""
-    norm = _normalize(answer)
-    return [t for t in SECTION_TITLES if _normalize(t) not in norm]
 
 
 class StrategyPipeline:
@@ -76,15 +67,22 @@ class StrategyPipeline:
         # 3. LLM
         result = self.llm_client.complete(prompt)
 
-        # 3b. Validate required section headings are present (no complex parsing yet)
-        missing = _missing_sections(result["answer"])
-        required_present = not missing
-        print(f"  [strategy] required sections present: {required_present}"
-              + (f"  missing: {missing}" if missing else ""))
+        # 3b. Deterministic quality check (sections, handoff, risky phrases).
+        #     Single source of validation — no duplicate section logic here.
+        quality          = StrategyQualityChecker().check(result["answer"])
+        strategy_missing = quality["missing_sections"]      # 8 sections incl. handoff
+        risky_phrases    = quality["risky_phrases"]
+        handoff_present  = quality["handoff_present"]
+        quality_label    = quality["label"]
 
-        # 3c. Validate the handoff section exists (presence only)
-        handoff_present = _normalize(HANDOFF_SECTION_TITLE) in _normalize(result["answer"])
-        print(f"  [strategy] handoff section present: {handoff_present}")
+        # 7-section view (handoff tracked separately) for the required-sections field
+        missing          = [s for s in strategy_missing if s != HANDOFF_SECTION_TITLE]
+        required_present = not missing
+        print(f"  [strategy] quality={quality_label}  sections_ok={required_present}  handoff={handoff_present}")
+        if strategy_missing:
+            print(f"  [strategy] missing: {strategy_missing}")
+        if risky_phrases:
+            print(f"  [strategy] risky phrases: {risky_phrases}")
 
         # 4. Save under knowledge/<project>/strategy/
         saved_path = knowledge_writer.save(
@@ -104,4 +102,8 @@ class StrategyPipeline:
             "project_context_used":     project_context_used,
             "project_context_empty":    project_context_empty,
             "handoff_section_present":  handoff_present,
+            "strategy_quality_label":   quality_label,
+            "strategy_missing_sections": strategy_missing,
+            "strategy_risky_phrases":   risky_phrases,
+            "strategy_handoff_present": handoff_present,
         }

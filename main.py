@@ -61,8 +61,11 @@ def main():
         print(f"  project  : used={strategy['project_context_used']} empty={strategy['project_context_empty']}")
         print(f"  sections : {'all present' if strategy['required_sections_present'] else 'INCOMPLETE'}")
         print(f"  handoff  : {'present' if strategy['handoff_section_present'] else 'MISSING'}")
-        if strategy["missing_sections"]:
-            print(f"  missing  : {strategy['missing_sections']}")
+        print(f"  quality  : {strategy['strategy_quality_label']}")
+        if strategy["strategy_missing_sections"]:
+            print(f"  missing  : {strategy['strategy_missing_sections']}")
+        if strategy["strategy_risky_phrases"]:
+            print(f"  risky    : {strategy['strategy_risky_phrases']}")
         print(f"  saved    : {strategy['saved_path']}")
         print("─" * 50)
     except RuntimeError as e:
