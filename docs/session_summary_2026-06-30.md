@@ -2,33 +2,56 @@
 
 ## Current architecture
 `Chronos` kernel (`core/boot.py`) boots config + identity, validates the folder
-structure, and owns the agent registry. Research runtime:
+structure, and owns the agent registry. Two runtimes now exist:
 
 ```
-ProjectLoader → Planner → Search (Tavily) → Evidence → Prompt (Hermes) → LLM (OpenAI) → KnowledgeWriter
+Research (Hermes):
+  ProjectLoader → Planner → Search (Tavily) → Evidence
+                → KnowledgeReader (prior knowledge) → Prompt (Hermes) → LLM (OpenAI) → KnowledgeWriter
+
+Strategy (Athena):
+  KnowledgeReader (knowledge/<project>/) → Prompt (Athena) → LLM (OpenAI)
+                → KnowledgeWriter (knowledge/<project>/strategy/)
 ```
 
-One live agent: **Hermes** (`agents/hermes_v2.py`, `HermesAgent` v1.1), loading a
-5-file constitution from `hermes/`. Folders: core / agents / tools / knowledge /
-contexts / identity / standards / persona / hermes / shared.
+Agents:
+- **Hermes** (`agents/hermes_v2.py`, v1.1) — research/fact collection, 5-file constitution.
+- **Athena** (`agents/athena_v1.py`, v0.1) — strategy interpretation, 4-file constitution
+  (`athena/`). Does **not** search the web; grounds all interpretation in saved knowledge.
 
-## Current Sprint
-Project-context-driven planned research — wiring `ProjectLoader` + `SimpleResearchPlanner`
-+ `ResearchPlan` + `contexts/` into the pipeline. **In progress, uncommitted.**
+Folders: core / agents / tools / knowledge / contexts / identity / standards / persona /
+hermes / athena / shared.
+
+## Completed this session
+- **KnowledgeReader sprint — completed.** `tools/knowledge_reader.py` reads existing
+  `knowledge/<project>/` files (deterministic, no embeddings/LLM/vector DB) and injects
+  them into the research prompt before new search evidence; pipeline output gained
+  `knowledge_used_count`.
+- **Athena 0.1 — completed.** New strategy agent + `core/strategy_pipeline.py`.
+- **`chronos.strategy(project, task)` wired and validated.** `main.py` runs research then
+  strategy end-to-end; Athena confirmed to perform no web search and to save under
+  `knowledge/<project>/strategy/`. `KnowledgeWriter.save()` extended (backward-compatible)
+  to support nested category paths.
 
 ## Current branch
-`main`, ahead of `origin/main` by 12 commits (none pushed).
+`main`, **ahead of `origin/main` by 3 commits** (not pushed). Working tree was **clean**
+before this summary update.
 
-## Last commit
-`62dde63` — feat(core): add ResearchContext and interactive pipeline (2026-06-29).
+## Latest commits
+- `feat(athena): add Athena strategy agent and strategy pipeline`
+- `docs: record KnowledgeReader sprint in ROADMAP and CHANGELOG`
+- `docs(knowledge): refresh amway-stp research and add Athena strategy output`
 
 ## Pending work
-- Modified (tracked): `core/boot.py`, `core/research_pipeline.py`, `main.py`
-- Untracked: `contexts/`, `core/project_loader.py`, `core/research_plan.py`, `tools/planner.py`
-- Plus today's docs additions: `docs/ROADMAP.md`, `docs/session_summary_2026-06-30.md`
-  and the earlier `# Session Start Rules` append to `CLAUDE.md`.
+- The only pending working-tree change is `docs/session_summary_2026-06-30.md` (this update, uncommitted).
+- Push of the 3 local commits to origin is still pending (deferred by request).
 
-## Next objective
-Finalize and commit the project-context + planner slice as one coherent feature,
-then push the local commits to origin. Before code changes, follow the Session Start
-Rules: read CLAUDE.md → ROADMAP → latest session summary → CHANGELOG and summarize.
+## Next planned sprint
+**Evidence dedup / ranking / source validation** — improve Hermes research quality:
+deduplicate evidence, rank by relevance/recency, and validate sources before they reach
+the prompt.
+
+## Standing technical debt (unchanged)
+- `identity/who_is_ryu.md` is empty (loads 0 chars).
+- Duplicate `agents/hermes.py` vs `agents/hermes_v2.py` (only v2 wired).
+- Hardcoded OpenAI provider in `main.py` / pipelines vs. CLAUDE.md §9.
