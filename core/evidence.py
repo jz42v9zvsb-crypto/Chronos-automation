@@ -17,10 +17,18 @@ class Evidence:
     snippet:     str
     score:       Optional[float] = None
     searched_at: str             = ""
+    source_type: str             = ""
+    confidence:  str             = ""
 
     def to_markdown(self, index: int) -> str:
+        header = f"{index}. {self.title}"
+        if self.confidence:
+            label = self.confidence
+            if self.source_type:
+                label += f", {self.source_type}"
+            header += f"  [{label}]"
         lines = [
-            f"{index}. {self.title}",
+            header,
             f"   {self.url}",
             f"   {self.snippet}",
         ]

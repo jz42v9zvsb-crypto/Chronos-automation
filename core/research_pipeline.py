@@ -19,13 +19,14 @@ def _topic_slug(task: str) -> str:
 
 
 class ResearchPipeline:
-    def __init__(self, chronos, search_provider, llm_client, knowledge_writer, planner=None, knowledge_reader=None):
-        self.chronos          = chronos
-        self.search_provider  = search_provider
-        self.llm_client       = llm_client
-        self.knowledge_writer = knowledge_writer
-        self.planner          = planner
-        self.knowledge_reader = knowledge_reader
+    def __init__(self, chronos, search_provider, llm_client, knowledge_writer, planner=None, knowledge_reader=None, evidence_quality_processor=None):
+        self.chronos                    = chronos
+        self.search_provider            = search_provider
+        self.llm_client                 = llm_client
+        self.knowledge_writer           = knowledge_writer
+        self.planner                    = planner
+        self.knowledge_reader           = knowledge_reader
+        self.evidence_quality_processor = evidence_quality_processor
 
     def run(self, task: str, ctx, project_ctx=None) -> dict:
         # 0. Read existing project knowledge (before new research)
@@ -54,7 +55,13 @@ class ResearchPipeline:
             search_data = self.search_provider.search(task)
             evidence    = self.search_provider.to_evidence(search_data)
 
-        search_summary = evidence_list_to_markdown(evidence)
+        # 1b. Quality pass — dedup, rank, confidence-label before the LLM sees it
+        processed = evidence
+        if self.evidence_quality_processor:
+            processed = self.evidence_quality_processor.process(evidence)
+            print(f"  [evidence] {len(evidence)} raw → {len(processed)} processed")
+
+        search_summary = evidence_list_to_markdown(processed)
 
         # Prepend existing knowledge before the new search evidence
         if knowledge_md:
@@ -85,7 +92,12 @@ class ResearchPipeline:
             "task":          task,
             "context":       ctx.project,
             "research_plan": plan.to_markdown() if plan else None,
-            "evidence_count": len(evidence),
+            "evidence_count": len(processed),
+            "evidence_count_raw": len(evidence),
+            "evidence_count_processed": len(processed),
+            "evidence_high_confidence_count":   sum(1 for e in processed if e.confidence == "High"),
+            "evidence_medium_confidence_count": sum(1 for e in processed if e.confidence == "Medium"),
+            "evidence_low_confidence_count":    sum(1 for e in processed if e.confidence == "Low"),
             "knowledge_used_count": len(existing_knowledge),
             "answer":        result["answer"],
             "provider":      result["provider"],

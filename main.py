@@ -11,6 +11,7 @@ from core.boot import Chronos
 from agents.hermes_v2 import HermesAgent
 from tools.planner import SimpleResearchPlanner
 from tools.knowledge_reader import KnowledgeReader
+from core.evidence_quality import EvidenceQualityProcessor
 
 
 def main():
@@ -27,13 +28,17 @@ def main():
             task="은준세 STP를 보강할 백그라운드 자료를 조사해줘",
             planner=SimpleResearchPlanner(),
             knowledge_reader=KnowledgeReader(chronos.root),
+            evidence_quality_processor=EvidenceQualityProcessor(),
         )
         print("\n" + "─" * 50)
         print(result["answer"])
         print("─" * 50)
         print(f"  model    : {result['model']}")
         print(f"  latency  : {result['latency_sec']}s")
-        print(f"  evidence : {result['evidence_count']} results")
+        print(f"  evidence : {result['evidence_count_processed']}/{result['evidence_count_raw']} (processed/raw)")
+        print(f"  conf     : High {result['evidence_high_confidence_count']} / "
+              f"Med {result['evidence_medium_confidence_count']} / "
+              f"Low {result['evidence_low_confidence_count']}")
         print(f"  knowledge: {result['knowledge_used_count']} prior file(s)")
         print(f"  saved    : {result['saved_path']}")
         if result.get("research_plan"):
