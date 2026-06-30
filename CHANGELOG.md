@@ -32,6 +32,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Project-aware strategy — Athena interprets knowledge through `contexts/<project>/`
   (reuses `ProjectLoader`); pipeline returns `project_context_used` /
   `project_context_empty`
+- Strategy handoff format — `StrategyHandoff` (`core/strategy_handoff.py`); Athena
+  emits a "Strategy Handoff" section (9 sub-sections) for a future writing/deck agent;
+  pipeline returns `handoff_section_present`
+- Deterministic strategy quality check — `StrategyQualityChecker`
+  (`core/strategy_quality.py`); validates sections, handoff, and risky/absolute
+  phrasing → Pass/Review/Fail (no LLM/embeddings); pipeline returns
+  `strategy_quality_label` / `strategy_missing_sections` / `strategy_risky_phrases` /
+  `strategy_handoff_present`
 
 ## [0.1.0] - 2026-06-29
 

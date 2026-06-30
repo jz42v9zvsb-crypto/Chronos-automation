@@ -34,16 +34,20 @@ hermes / athena / shared.
   7-section report; `required_sections_present` / `missing_sections`.
 - **Project-aware strategy (Athena)** — interprets knowledge through `contexts/<project>/`
   (reuses `ProjectLoader`); `project_context_used` / `project_context_empty`.
+- **Strategy handoff (Athena)** — `StrategyHandoff`; Athena emits a "Strategy Handoff"
+  section (9 sub-sections) for a future writing/deck agent; `handoff_section_present`.
+- **Deterministic strategy quality check (Athena)** — `StrategyQualityChecker` gates
+  output (sections, handoff, risky phrasing) → Pass/Review/Fail; no LLM/embeddings.
 
 ## Current branch
 `main`, in sync with `origin/main` (all feature commits, docs, and refreshed knowledge
 artifacts pushed). Working tree clean.
 
 ## Latest commits (most recent first)
+- `d4df3ed` feat(athena): add deterministic strategy quality check
+- `3e913ce` feat(athena): add strategy handoff format
 - `ea7db5b` feat(athena): add project-aware strategy context
 - `e9885f0` feat(athena): add structured strategy output
-- `77607e5` feat(evidence): add evidence dedup, ranking, and source validation
-- `202aa7a` feat(athena): add Athena strategy agent and strategy pipeline
 
 ## Pending work
 - None outstanding — code, docs (ROADMAP/CHANGELOG/this summary), and knowledge

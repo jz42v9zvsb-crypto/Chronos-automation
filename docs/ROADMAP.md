@@ -121,11 +121,28 @@ STRATEGIC INTERPRETATION distinct.
 - `ea7db5b` feat(athena): add project-aware strategy context
   (project_context_used / project_context_empty metadata)
 
+### Sprint 10 — Strategy handoff format (Athena)
+Athena emits a final "Strategy Handoff" section (section 8, 9 sub-sections) so
+strategy can pass cleanly to a future writing/deck agent without reinterpretation.
+Athena remains strategy-only (Apollo not implemented).
+- `3e913ce` feat(athena): add strategy handoff format
+  (`core/strategy_handoff.py` + `HANDOFF_SECTION_TITLE`/`HANDOFF_SUBSECTIONS`,
+  prompt requirement + presence validation, `handoff_section_present`)
+
+### Sprint 11 — Deterministic strategy quality check (Athena)
+Deterministic gate on Athena output before it is considered usable: required
+sections, handoff presence, and risky/absolute phrasing → Pass/Review/Fail. No LLM,
+no embeddings.
+- `d4df3ed` feat(athena): add deterministic strategy quality check
+  (`core/strategy_quality.py`, pipeline routes validation through the checker and
+  removes duplicate section logic; strategy_quality_label / strategy_missing_sections
+  / strategy_risky_phrases / strategy_handoff_present)
+
 ---
 
 ## Current Sprint
 
-None in progress. Latest completed: Sprint 9 (project-aware strategy).
+None in progress. Latest completed: Sprint 11 (deterministic strategy quality check).
 
 ---
 
@@ -137,8 +154,8 @@ Sourced from README.md's stated agent plan and existing technical debt — not i
   - Apollo — script / content
   - Hephaestus — automation / code / API
   - Zeus — routing / orchestration (planned last)
-- **Strategy parsing** — populate `StrategyOutput` fields from Athena's markdown
-  (deferred from Sprint 8 — currently heading-presence validation only).
+- **Strategy parsing** — populate `StrategyOutput` / `StrategyHandoff` fields from
+  Athena's markdown (deferred — currently heading-presence validation only).
 - **Provider abstraction** — remove the hardcoded OpenAI dependency in `main.py`
   and the pipeline so providers are truly interchangeable (per `CLAUDE.md §9`).
 - **Consolidate Hermes** — resolve the duplicate `agents/hermes.py` vs
