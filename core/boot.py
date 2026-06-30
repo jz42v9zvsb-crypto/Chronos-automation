@@ -150,6 +150,35 @@ class Chronos:
 
         return pipeline.run(task=task, ctx=ctx, project_ctx=project_ctx)
 
+    def strategy(self, project: str, task: str) -> dict:
+        """
+        축적된 지식(Hermes 리서치)을 Athena로 해석해 전략을 생성한다.
+
+        웹 검색을 하지 않는다. knowledge/<project>/를 읽어
+        Athena 프롬프트를 만들고 LLM으로 전략 해석을 산출한다.
+        """
+        from agents.athena_v1 import AthenaAgent
+        from core.strategy_pipeline import StrategyPipeline
+        from tools.openai_client import OpenAIClient
+        from tools.knowledge_writer import KnowledgeWriter
+        from tools.knowledge_reader import KnowledgeReader
+
+        athena = AthenaAgent(self.root)
+        athena.load()
+
+        pipeline = StrategyPipeline(
+            chronos=self,
+            llm_client=OpenAIClient(self.config),
+            knowledge_reader=KnowledgeReader(self.root),
+        )
+
+        return pipeline.run(
+            project=project,
+            task=task,
+            athena=athena,
+            knowledge_writer=KnowledgeWriter(self.root),
+        )
+
     def register(self, name: str, agent):
         """에이전트 등록"""
         self.agents[name] = agent

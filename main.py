@@ -39,6 +39,22 @@ def main():
         if result.get("research_plan"):
             print("\n" + result["research_plan"])
         print("─" * 50)
+
+        # 2. Strategy (Athena) — interpret the saved research, no web search
+        strategy = chronos.strategy(
+            project="amway-stp",
+            task="은준세 STP 자료를 바탕으로 STP 장표의 전략적 메시지 구조를 제안해줘",
+        )
+        print("\n" + "═" * 50)
+        print("  ATHENA — Strategic Interpretation")
+        print("═" * 50)
+        print(strategy["answer"])
+        print("─" * 50)
+        print(f"  model    : {strategy['model']}")
+        print(f"  latency  : {strategy['latency_sec']}s")
+        print(f"  knowledge: {strategy['knowledge_used_count']} prior file(s)")
+        print(f"  saved    : {strategy['saved_path']}")
+        print("─" * 50)
     except RuntimeError as e:
         print(f"\n{e}\n")
     except openai.OpenAIError as e:

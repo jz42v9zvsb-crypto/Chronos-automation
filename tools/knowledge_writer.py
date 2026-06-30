@@ -18,7 +18,8 @@ class KnowledgeWriter:
         self.root = root
 
     def save(self, category: str, topic: str, content: str) -> Path:
-        category = _sanitize(category)
+        # category may be a nested path ("project/strategy"); sanitize each segment
+        category = "/".join(_sanitize(part) for part in category.split("/") if part.strip())
         topic = _sanitize(topic)
 
         directory = self.root / "knowledge" / category
