@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- `KnowledgeReader` (`tools/knowledge_reader.py`) — reads existing saved knowledge
+  from `knowledge/<project>/` and renders it to markdown; deterministic (most-recent
+  by modification time), no embeddings/LLM/vector database
+- Research pipeline now reads existing project knowledge before new research and
+  injects it into the prompt ahead of new search evidence; output dict gains
+  `knowledge_used_count`
+- `Chronos.research()` and `ResearchPipeline` thread an optional `knowledge_reader`
+  dependency; `main.py` instantiates and passes it
+- Project-aware research planning — `ProjectLoader` (`contexts/<project>/`),
+  `SimpleResearchPlanner`, and `ResearchPlan` wired into the pipeline
+
 ## [0.1.0] - 2026-06-29
 
 ### Added

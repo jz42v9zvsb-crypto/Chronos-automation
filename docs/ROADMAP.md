@@ -72,23 +72,30 @@ All commits below landed 2026-06-29. Grouped by theme.
 - `8877305` add ResearchPipeline
 - `a0edfe1` add Evidence layer
 - `ea8c68c` add Prompt object
-- `62dde63` add ResearchContext and interactive pipeline  *(current `main` tip)*
+- `62dde63` add ResearchContext and interactive pipeline
+
+### Sprint 4 — Project-context-driven planned research
+Drive research from a per-project context and a multi-query plan instead of a single
+ad-hoc query. `ProjectLoader` reads `contexts/<project>/`, `SimpleResearchPlanner`
+generates planned queries, both wired into the pipeline.
+- `61e0828` feat(core): add project-aware research planner
+  (`core/project_loader.py`, `core/research_plan.py`, `tools/planner.py`, `contexts/`,
+  plus pipeline/boot/main wiring)
+
+### Sprint 5 — Knowledge reuse (KnowledgeReader)
+Read existing saved knowledge from `knowledge/<project>/` and inject it into the
+research prompt before new search evidence, so research accumulates. Deterministic;
+no embeddings, no LLM, no vector database.
+- `259fc61` feat(knowledge): add KnowledgeReader
+  (`tools/knowledge_reader.py`, plus `research_pipeline`/`boot`/`main` threading and
+  the `knowledge_used_count` output field)
+- `82eb3a9` docs(knowledge): refresh amway-stp research output
 
 ---
 
-## Current Sprint — Project-context-driven planned research (in progress)
+## Current Sprint
 
-Present in the working tree, **not yet committed**:
-
-- `core/project_loader.py` — loads `contexts/<project>/` into a ProjectContext
-- `core/research_plan.py` — research plan model
-- `tools/planner.py` — `SimpleResearchPlanner` (generates planned queries)
-- `contexts/` — first project context (`amway-stp/`)
-- modifications to `core/boot.py`, `core/research_pipeline.py`, `main.py` to wire
-  the planner + project loader into the pipeline
-
-Goal: drive research from a per-project context and a multi-query plan instead of a
-single ad-hoc query.
+None in progress. Sprint 5 (KnowledgeReader) is complete and pushed to origin.
 
 ---
 
@@ -105,4 +112,3 @@ Sourced from README.md's stated agent plan and existing technical debt — not i
   and the pipeline so providers are truly interchangeable (per `CLAUDE.md §9`).
 - **Consolidate Hermes** — resolve the duplicate `agents/hermes.py` vs
   `agents/hermes_v2.py` (only v2 is wired) per `CLAUDE.md §2`.
-- **Commit & push the current slice**, then push the 12 local commits to origin.
