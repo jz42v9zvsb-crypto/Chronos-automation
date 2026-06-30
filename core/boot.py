@@ -184,6 +184,36 @@ class Chronos:
             project_ctx=project_ctx,
         )
 
+    def write(self, project: str, task: str) -> dict:
+        """
+        Athena 전략(knowledge/<project>/strategy/)을 Apollo로 받아
+        STP 장표 내러티브 초안을 작성한다.
+
+        웹 검색을 하지 않는다. 새로운 사실을 만들지 않는다.
+        결과는 knowledge/<project>/drafts/에 저장한다.
+        """
+        from agents.apollo_v1 import ApolloAgent
+        from core.writing_pipeline import WritingPipeline
+        from tools.openai_client import OpenAIClient
+        from tools.knowledge_writer import KnowledgeWriter
+        from tools.knowledge_reader import KnowledgeReader
+
+        apollo = ApolloAgent(self.root)
+        apollo.load()
+
+        pipeline = WritingPipeline(
+            chronos=self,
+            llm_client=OpenAIClient(self.config),
+            knowledge_reader=KnowledgeReader(self.root),
+        )
+
+        return pipeline.run(
+            project=project,
+            task=task,
+            apollo=apollo,
+            knowledge_writer=KnowledgeWriter(self.root),
+        )
+
     def register(self, name: str, agent):
         """에이전트 등록"""
         self.agents[name] = agent

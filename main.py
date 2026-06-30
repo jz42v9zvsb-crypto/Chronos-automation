@@ -68,6 +68,22 @@ def main():
             print(f"  risky    : {strategy['strategy_risky_phrases']}")
         print(f"  saved    : {strategy['saved_path']}")
         print("─" * 50)
+
+        # 3. Writing (Apollo) — turn strategy/handoff into a deck draft, no web search
+        draft = chronos.write(
+            project="amway-stp",
+            task="Athena 전략 핸드오프를 바탕으로 은준세 STP 장표 초안을 작성해줘",
+        )
+        print("\n" + "═" * 50)
+        print("  APOLLO — Deck Draft")
+        print("═" * 50)
+        print(draft["answer"])
+        print("─" * 50)
+        print(f"  model    : {draft['model']}")
+        print(f"  latency  : {draft['latency_sec']}s")
+        print(f"  strategy : {draft['strategy_used_count']} file(s)")
+        print(f"  saved    : {draft['saved_path']}")
+        print("─" * 50)
     except RuntimeError as e:
         print(f"\n{e}\n")
     except openai.OpenAIError as e:
