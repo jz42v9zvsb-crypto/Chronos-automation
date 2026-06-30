@@ -242,3 +242,26 @@ Small validated changes are better than large rewrites.
 Chronos OS is the product.
 
 The model is only an interchangeable engine.
+
+---
+
+# Session Start Rules
+
+Every new Claude Code session must begin with understanding the current project before making any edits.
+
+Read these files in order:
+
+1. CLAUDE.md
+2. docs/ROADMAP.md
+3. Latest docs/session_summary_*.md
+4. CHANGELOG.md
+
+After reading them:
+
+- Summarize the current architecture.
+- Summarize the current Sprint.
+- Summarize pending work.
+- Show git status.
+- Wait for user approval.
+
+Never start coding immediately after a new session.
