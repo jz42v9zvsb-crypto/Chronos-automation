@@ -58,6 +58,9 @@ def main():
         print(f"  model    : {strategy['model']}")
         print(f"  latency  : {strategy['latency_sec']}s")
         print(f"  knowledge: {strategy['knowledge_used_count']} prior file(s)")
+        print(f"  sections : {'all present' if strategy['required_sections_present'] else 'INCOMPLETE'}")
+        if strategy["missing_sections"]:
+            print(f"  missing  : {strategy['missing_sections']}")
         print(f"  saved    : {strategy['saved_path']}")
         print("─" * 50)
     except RuntimeError as e:
