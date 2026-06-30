@@ -12,6 +12,7 @@ from datetime import datetime
 
 from core.prompt import Prompt
 from core.strategy_output import SECTION_TITLES
+from core.strategy_handoff import HANDOFF_SECTION_TITLE, HANDOFF_SUBSECTIONS
 
 
 def _topic_slug(task: str) -> str:
@@ -53,12 +54,17 @@ class StrategyPipeline:
         #    INTERPRETATION. Require the exact 7 StrategyOutput sections so results
         #    are consistent and directly usable for STP slide planning.
         section_list = "\n".join(f"{i}. {t}" for i, t in enumerate(SECTION_TITLES, 1))
+        handoff_subs = "\n".join(f"   - {s}" for s in HANDOFF_SUBSECTIONS)
         context = (
             "# STRATEGIC INTERPRETATION (당신의 과제)\n"
             f"현재 작업은 '{project}' 프로젝트의 전략 해석입니다.\n"
             "위 PROJECT CONTEXT(목표·오디언스·제약)를 렌즈로 삼아 EXISTING KNOWLEDGE를 해석하세요.\n"
-            "반드시 아래 7개 섹션 제목을 영문 그대로, 마크다운 헤딩으로 사용해 출력하세요:\n"
-            f"{section_list}"
+            "반드시 아래 섹션 제목을 영문 그대로, 마크다운 헤딩으로 사용해 출력하세요:\n"
+            f"{section_list}\n"
+            f"{len(SECTION_TITLES) + 1}. {HANDOFF_SECTION_TITLE}\n"
+            f"   '{HANDOFF_SECTION_TITLE}' 섹션에는 아래 하위 항목을 모두 포함하세요 "
+            "(미래의 글쓰기/덱 에이전트가 전략을 재해석하지 않고 바로 쓸 수 있도록):\n"
+            f"{handoff_subs}"
         )
         system = athena.build_system_prompt(
             context=context,
@@ -75,6 +81,10 @@ class StrategyPipeline:
         required_present = not missing
         print(f"  [strategy] required sections present: {required_present}"
               + (f"  missing: {missing}" if missing else ""))
+
+        # 3c. Validate the handoff section exists (presence only)
+        handoff_present = _normalize(HANDOFF_SECTION_TITLE) in _normalize(result["answer"])
+        print(f"  [strategy] handoff section present: {handoff_present}")
 
         # 4. Save under knowledge/<project>/strategy/
         saved_path = knowledge_writer.save(
@@ -93,4 +103,5 @@ class StrategyPipeline:
             "missing_sections":         missing,
             "project_context_used":     project_context_used,
             "project_context_empty":    project_context_empty,
+            "handoff_section_present":  handoff_present,
         }

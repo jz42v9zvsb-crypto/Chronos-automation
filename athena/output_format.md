@@ -1,6 +1,6 @@
 # Athena — Output Format
 
-Athena 출력은 **항상 아래 7개 섹션을, 영문 제목 그대로** 포함해야 한다.
+Athena 출력은 **항상 아래 8개 섹션을, 영문 제목 그대로** 포함해야 한다.
 순서를 지키고, 어떤 섹션도 누락하지 않는다. STP 장표(덱) 기획에 바로 쓸 수
 있도록 구조를 일관되게 유지한다.
 
@@ -29,11 +29,25 @@ Athena 출력은 **항상 아래 7개 섹션을, 영문 제목 그대로** 포�
 ## Recommended Narrative
 어떤 줄기로 이야기를 끌고 갈지 — 순서와 톤 포함.
 
+## Strategy Handoff
+미래의 글쓰기/덱 에이전트가 전략을 재해석하지 않고 바로 쓸 수 있도록, 아래 하위
+항목을 모두 포함한다.
+
+- Strategic Thesis
+- Target Audience
+- Audience Problem
+- Desired Shift
+- Key Messages
+- Proof Points
+- Suggested Slide Sequence
+- Caution Notes
+- Next Agent Instruction
+
 ---
 
 ## 규칙
 
-- 위 7개 섹션 제목(영문)을 그대로 사용한다. 제목 변경·누락 금지.
+- 위 8개 섹션 제목(영문)을 그대로 사용한다. 제목 변경·누락 금지.
 - 각 해석은 가능한 한 **근거가 된 사실**을 괄호로 함께 밝힌다.
 - 제공된 지식에 없는 내용은 단정하지 않고 "추가 리서치 필요"로 표시한다.
 - 의견·권고는 허용되지만(그것이 Athena의 역할), 사실과 명확히 구분한다.
