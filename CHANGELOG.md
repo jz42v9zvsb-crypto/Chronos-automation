@@ -18,6 +18,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dependency; `main.py` instantiates and passes it
 - Project-aware research planning — `ProjectLoader` (`contexts/<project>/`),
   `SimpleResearchPlanner`, and `ResearchPlan` wired into the pipeline
+- `Athena` strategy agent (`agents/athena_v1.py`) + `core/strategy_pipeline.py` and
+  `chronos.strategy()` — interprets saved knowledge into strategy; no web search;
+  saves under `knowledge/<project>/strategy/`. `KnowledgeWriter.save()` now supports
+  nested category paths
+- `EvidenceQualityProcessor` (`core/evidence_quality.py`) — deduplicates, classifies
+  source quality, confidence-labels, and ranks evidence before the LLM; `Evidence`
+  gains `source_type`/`confidence`; pipeline returns raw/processed and
+  High/Medium/Low confidence counts
+- Structured strategy output — `StrategyOutput` + `SECTION_TITLES`
+  (`core/strategy_output.py`); Athena produces a fixed 7-section report; pipeline
+  returns `required_sections_present` / `missing_sections`
+- Project-aware strategy — Athena interprets knowledge through `contexts/<project>/`
+  (reuses `ProjectLoader`); pipeline returns `project_context_used` /
+  `project_context_empty`
 
 ## [0.1.0] - 2026-06-29
 

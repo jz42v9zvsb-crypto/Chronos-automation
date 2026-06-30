@@ -50,7 +50,7 @@ structure, and owns the agent registry (`register` / `route` / `ask` / `research
 
 ## Completed Sprints
 
-All commits below landed 2026-06-29. Grouped by theme.
+Grouped by theme. Sprints 1–5 landed 2026-06-29; Sprints 6–9 on 2026-06-30.
 
 ### Sprint 1 — Foundation & structure
 - `ae62c98` Initial commit
@@ -91,11 +91,41 @@ no embeddings, no LLM, no vector database.
   the `knowledge_used_count` output field)
 - `82eb3a9` docs(knowledge): refresh amway-stp research output
 
+### Sprint 6 — Athena 0.1 (strategy agent)
+New strategy agent that interprets accumulated Hermes knowledge into strategic
+direction. No web search; grounded in saved knowledge. `chronos.strategy()` wired;
+saves under `knowledge/<project>/strategy/`.
+- `202aa7a` feat(athena): add Athena strategy agent and strategy pipeline
+  (`agents/athena_v1.py`, `athena/` constitution, `core/strategy_pipeline.py`,
+  nested `KnowledgeWriter` category paths)
+- `a6463f9` docs(knowledge): refresh amway-stp research and add Athena strategy output
+
+### Sprint 7 — Evidence quality (Hermes)
+Deduplicate, classify source quality, confidence-label, and rank evidence before it
+reaches the LLM. Deterministic; no embeddings/LLM/vector DB.
+- `77607e5` feat(evidence): add evidence dedup, ranking, and source validation
+  (`core/evidence_quality.py`, `Evidence` source_type/confidence fields, pipeline
+  raw/processed + High/Med/Low confidence counts)
+
+### Sprint 8 — Structured strategy output (Athena)
+Athena emits a fixed 7-section report (Core Insight → Recommended Narrative) for
+consistent, deck-ready STP planning; pipeline validates section presence.
+- `e9885f0` feat(athena): add structured strategy output
+  (`core/strategy_output.py` + `SECTION_TITLES`, required_sections_present /
+  missing_sections)
+
+### Sprint 9 — Project-aware strategy (Athena)
+Strategy interprets knowledge through the project context (`contexts/<project>/` via
+the existing `ProjectLoader`). Prompt keeps PROJECT CONTEXT / EXISTING KNOWLEDGE /
+STRATEGIC INTERPRETATION distinct.
+- `ea7db5b` feat(athena): add project-aware strategy context
+  (project_context_used / project_context_empty metadata)
+
 ---
 
 ## Current Sprint
 
-None in progress. Sprint 5 (KnowledgeReader) is complete and pushed to origin.
+None in progress. Latest completed: Sprint 9 (project-aware strategy).
 
 ---
 
@@ -103,11 +133,12 @@ None in progress. Sprint 5 (KnowledgeReader) is complete and pushed to origin.
 
 Sourced from README.md's stated agent plan and existing technical debt — not invented.
 
-- **Additional agents** (README marks these 🔜):
-  - Athena — interpretation / strategy
+- **Remaining agents** (README marks these 🔜):
   - Apollo — script / content
   - Hephaestus — automation / code / API
   - Zeus — routing / orchestration (planned last)
+- **Strategy parsing** — populate `StrategyOutput` fields from Athena's markdown
+  (deferred from Sprint 8 — currently heading-presence validation only).
 - **Provider abstraction** — remove the hardcoded OpenAI dependency in `main.py`
   and the pipeline so providers are truly interchangeable (per `CLAUDE.md §9`).
 - **Consolidate Hermes** — resolve the duplicate `agents/hermes.py` vs
