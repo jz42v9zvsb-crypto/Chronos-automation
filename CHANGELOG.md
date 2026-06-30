@@ -40,6 +40,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   phrasing → Pass/Review/Fail (no LLM/embeddings); pipeline returns
   `strategy_quality_label` / `strategy_missing_sections` / `strategy_risky_phrases` /
   `strategy_handoff_present`
+- `Apollo` writing/deck agent (`agents/apollo_v1.py`) + `core/writing_pipeline.py` and
+  `chronos.write()` — turns Athena strategy/handoff (`knowledge/<project>/strategy/`)
+  into a deck narrative draft saved under `knowledge/<project>/drafts/`; no web search,
+  no fact invention, no PPTX
 
 ## [0.1.0] - 2026-06-29
 

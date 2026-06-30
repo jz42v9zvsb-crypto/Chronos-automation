@@ -12,16 +12,23 @@ Research (Hermes):
 Strategy (Athena):
   ProjectLoader (contexts/<project>/) + KnowledgeReader (knowledge/<project>/)
                 → Prompt (Athena) → LLM (OpenAI) → KnowledgeWriter (knowledge/<project>/strategy/)
+
+Writing (Apollo):
+  strategy reader (knowledge/<project>/strategy/) → Prompt (Apollo) → LLM (OpenAI)
+                → KnowledgeWriter (knowledge/<project>/drafts/)
 ```
 
 Agents:
 - **Hermes** (`agents/hermes_v2.py`, v1.1) — research/fact collection, 5-file constitution.
 - **Athena** (`agents/athena_v1.py`, v0.1) — strategy interpretation, 4-file constitution
-  (`athena/`). No web search. Now produces a fixed 7-section structured report and
-  interprets through project context.
+  (`athena/`). No web search. Structured 7-section report, project-aware, with handoff +
+  deterministic quality gate.
+- **Apollo** (`agents/apollo_v1.py`, v0.1) — writing/deck narrative, 4-file constitution
+  (`apollo/`). Writes drafts from Athena strategy/handoff; no web search, no fact
+  invention, no PPTX.
 
 Folders: core / agents / tools / knowledge / contexts / identity / standards / persona /
-hermes / athena / shared.
+hermes / athena / apollo / shared.
 
 ## Completed this session
 - **KnowledgeReader** — reads accumulated `knowledge/<project>/` into the research prompt.
@@ -38,14 +45,17 @@ hermes / athena / shared.
   section (9 sub-sections) for a future writing/deck agent; `handoff_section_present`.
 - **Deterministic strategy quality check (Athena)** — `StrategyQualityChecker` gates
   output (sections, handoff, risky phrasing) → Pass/Review/Fail; no LLM/embeddings.
+- **Apollo 0.1 (writing/deck agent)** — `WritingPipeline` + `chronos.write()`; turns
+  Athena strategy/handoff into a deck draft under `knowledge/<project>/drafts/`.
+  Full chain now runs: research → strategy → write.
 
 ## Current branch
 `main`, in sync with `origin/main` (all feature commits, docs, and refreshed knowledge
 artifacts pushed). Working tree clean.
 
 ## Latest commits (most recent first)
+- `f5970e6` feat(apollo): add Apollo writing/deck agent
 - `d4df3ed` feat(athena): add deterministic strategy quality check
-- `3e913ce` feat(athena): add strategy handoff format
 - `ea7db5b` feat(athena): add project-aware strategy context
 - `e9885f0` feat(athena): add structured strategy output
 
@@ -54,8 +64,9 @@ artifacts pushed). Working tree clean.
   artifacts are committed and pushed.
 
 ## Next planned sprint
-Candidates (see ROADMAP): **Strategy parsing** (populate `StrategyOutput` from Athena's
-markdown), or **Apollo** (content/script agent). Plus provider abstraction and Hermes
+Candidates (see ROADMAP): **Strategy parsing** (populate `StrategyOutput`/`StrategyHandoff`
+from markdown), **KnowledgeReader nested paths**, or **Hephaestus**. Plus provider
+abstraction and Hermes
 consolidation.
 
 ## Standing technical debt (unchanged)

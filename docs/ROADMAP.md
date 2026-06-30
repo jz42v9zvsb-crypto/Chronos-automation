@@ -138,11 +138,21 @@ no embeddings.
   removes duplicate section logic; strategy_quality_label / strategy_missing_sections
   / strategy_risky_phrases / strategy_handoff_present)
 
+### Sprint 12 — Apollo 0.1 (writing/deck agent)
+New writing agent that turns Athena strategy/handoff (`knowledge/<project>/strategy/`)
+into a deck narrative draft saved under `knowledge/<project>/drafts/`. No web search,
+no fact invention, no PPTX. `chronos.write()` wired; `main.py` runs research →
+strategy → write. (WritingPipeline reads the strategy subdir directly because
+KnowledgeReader cannot reach subdirectories and is left unchanged by constraint.)
+- `f5970e6` feat(apollo): add Apollo writing/deck agent
+  (`apollo/` constitution, `agents/apollo_v1.py`, `core/writing_pipeline.py`,
+  `chronos.write()`)
+
 ---
 
 ## Current Sprint
 
-None in progress. Latest completed: Sprint 11 (deterministic strategy quality check).
+None in progress. Latest completed: Sprint 12 (Apollo 0.1 writing/deck agent).
 
 ---
 
@@ -151,9 +161,10 @@ None in progress. Latest completed: Sprint 11 (deterministic strategy quality ch
 Sourced from README.md's stated agent plan and existing technical debt — not invented.
 
 - **Remaining agents** (README marks these 🔜):
-  - Apollo — script / content
   - Hephaestus — automation / code / API
   - Zeus — routing / orchestration (planned last)
+- **KnowledgeReader nested paths** — let `read_project_knowledge` reach
+  `knowledge/<project>/strategy|drafts/` so Apollo/Athena need no direct reads.
 - **Strategy parsing** — populate `StrategyOutput` / `StrategyHandoff` fields from
   Athena's markdown (deferred — currently heading-presence validation only).
 - **Provider abstraction** — remove the hardcoded OpenAI dependency in `main.py`
