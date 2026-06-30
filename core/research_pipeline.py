@@ -19,14 +19,23 @@ def _topic_slug(task: str) -> str:
 
 
 class ResearchPipeline:
-    def __init__(self, chronos, search_provider, llm_client, knowledge_writer, planner=None):
+    def __init__(self, chronos, search_provider, llm_client, knowledge_writer, planner=None, knowledge_reader=None):
         self.chronos          = chronos
         self.search_provider  = search_provider
         self.llm_client       = llm_client
         self.knowledge_writer = knowledge_writer
         self.planner          = planner
+        self.knowledge_reader = knowledge_reader
 
     def run(self, task: str, ctx, project_ctx=None) -> dict:
+        # 0. Read existing project knowledge (before new research)
+        existing_knowledge = []
+        knowledge_md       = ""
+        if self.knowledge_reader:
+            existing_knowledge = self.knowledge_reader.read_project_knowledge(ctx.project)
+            knowledge_md       = self.knowledge_reader.to_markdown(existing_knowledge)
+            print(f"  [knowledge] {len(existing_knowledge)} existing file(s) loaded")
+
         # 1. Plan → Search → Evidence
         plan     = None
         evidence = []
@@ -46,6 +55,10 @@ class ResearchPipeline:
             evidence    = self.search_provider.to_evidence(search_data)
 
         search_summary = evidence_list_to_markdown(evidence)
+
+        # Prepend existing knowledge before the new search evidence
+        if knowledge_md:
+            search_summary = knowledge_md + "\n\n---\n\n" + search_summary
 
         # Prepend project context if available
         if project_ctx and not project_ctx.is_empty():
@@ -73,6 +86,7 @@ class ResearchPipeline:
             "context":       ctx.project,
             "research_plan": plan.to_markdown() if plan else None,
             "evidence_count": len(evidence),
+            "knowledge_used_count": len(existing_knowledge),
             "answer":        result["answer"],
             "provider":      result["provider"],
             "model":         result["model"],

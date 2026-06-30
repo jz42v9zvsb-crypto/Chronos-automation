@@ -116,7 +116,7 @@ class Chronos:
             context=ctx.project,
         )
 
-    def research(self, project: str, task: str, planner=None) -> dict:
+    def research(self, project: str, task: str, planner=None, knowledge_reader=None) -> dict:
         """
         프로젝트 컨텍스트를 자동 로드하고 리서치 파이프라인을 실행한다.
 
@@ -128,6 +128,7 @@ class Chronos:
         from tools.search import TavilySearchProvider
         from tools.openai_client import OpenAIClient
         from tools.knowledge_writer import KnowledgeWriter
+        from tools.knowledge_reader import KnowledgeReader
 
         project_ctx = ProjectLoader(self.root).load(project)
 
@@ -144,6 +145,7 @@ class Chronos:
             llm_client=OpenAIClient(self.config),
             knowledge_writer=KnowledgeWriter(self.root),
             planner=planner,
+            knowledge_reader=knowledge_reader or KnowledgeReader(self.root),
         )
 
         return pipeline.run(task=task, ctx=ctx, project_ctx=project_ctx)
