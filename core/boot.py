@@ -116,6 +116,38 @@ class Chronos:
             context=ctx.project,
         )
 
+    def research(self, project: str, task: str, planner=None) -> dict:
+        """
+        프로젝트 컨텍스트를 자동 로드하고 리서치 파이프라인을 실행한다.
+
+        contexts/<project>/ 파일에서 ProjectContext를 읽어
+        ResearchPipeline에 주입한다.
+        """
+        from core.project_loader import ProjectLoader
+        from core.research_pipeline import ResearchPipeline
+        from tools.search import TavilySearchProvider
+        from tools.openai_client import OpenAIClient
+        from tools.knowledge_writer import KnowledgeWriter
+
+        project_ctx = ProjectLoader(self.root).load(project)
+
+        ctx = ResearchContext(
+            project=project,
+            persona=project_ctx.audience.split("\n")[0].strip() if project_ctx.audience else "일반",
+            output="report",
+            depth="standard",
+        )
+
+        pipeline = ResearchPipeline(
+            chronos=self,
+            search_provider=TavilySearchProvider(self.config),
+            llm_client=OpenAIClient(self.config),
+            knowledge_writer=KnowledgeWriter(self.root),
+            planner=planner,
+        )
+
+        return pipeline.run(task=task, ctx=ctx, project_ctx=project_ctx)
+
     def register(self, name: str, agent):
         """에이전트 등록"""
         self.agents[name] = agent

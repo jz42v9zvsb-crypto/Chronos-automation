@@ -8,20 +8,8 @@ sys.stdin.reconfigure(encoding="utf-8")
 
 import openai
 from core.boot import Chronos
-from core.context import ResearchContext
-from core.research_pipeline import ResearchPipeline
 from agents.hermes_v2 import HermesAgent
-from tools.search import TavilySearchProvider
-from tools.openai_client import OpenAIClient
-from tools.knowledge_writer import KnowledgeWriter
-
-
-def prompt_input(label: str, hint: str = "") -> str:
-    if hint:
-        print(f"\n{label} ({hint}):")
-    else:
-        print(f"\n{label}:")
-    return input("> ").strip()
+from tools.planner import SimpleResearchPlanner
 
 
 def main():
@@ -32,34 +20,21 @@ def main():
     hermes.load()
     chronos.register("hermes", hermes)
 
-    pipeline = ResearchPipeline(
-        chronos=chronos,
-        search_provider=TavilySearchProvider(chronos.config),
-        llm_client=OpenAIClient(chronos.config),
-        knowledge_writer=KnowledgeWriter(chronos.root),
-    )
-
-    project = prompt_input("Project", "gamdo / amway / axis / investment")
-    persona = prompt_input("Persona", "luxury_customer / young_mom / second_millennial / millennial / silver")
-    output  = prompt_input("Output",  "ppt / youtube / report / notes")
-    depth   = prompt_input("Depth",   "snapshot / standard / deep")
-    task    = prompt_input("Task")
-
-    ctx = ResearchContext(
-        project=project,
-        persona=persona,
-        output=output,
-        depth=depth,
-    )
-
     try:
-        result = pipeline.run(task=task, ctx=ctx)
+        result = chronos.research(
+            project="amway-stp",
+            task="은준세 STP를 보강할 백그라운드 자료를 조사해줘",
+            planner=SimpleResearchPlanner(),
+        )
         print("\n" + "─" * 50)
         print(result["answer"])
         print("─" * 50)
-        print(f"  model   : {result['model']}")
-        print(f"  latency : {result['latency_sec']}s")
-        print(f"  saved   : {result['saved_path']}")
+        print(f"  model    : {result['model']}")
+        print(f"  latency  : {result['latency_sec']}s")
+        print(f"  evidence : {result['evidence_count']} results")
+        print(f"  saved    : {result['saved_path']}")
+        if result.get("research_plan"):
+            print("\n" + result["research_plan"])
         print("─" * 50)
     except RuntimeError as e:
         print(f"\n{e}\n")
